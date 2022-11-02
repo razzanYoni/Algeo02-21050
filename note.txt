@@ -1,0 +1,2 @@
+bisa jadi error waktu compile karena beda versi python
+di pyvenv.cfg
