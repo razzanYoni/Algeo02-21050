@@ -2,3 +2,7 @@ bisa jadi error waktu compile karena beda versi python
 di pyvenv.cfg
 
 https://www.tutorialspoint.com/python/python_gui_programming.htm#:~:text=Tkinter%20Programming&text=Import%20the%20Tkinter%20module.,event%20triggered%20by%20the%20user.
+
+https://stackoverflow.com/questions/34993200/copy-complete-virtualenv-to-another-pc
+
+https://youtu.be/oXlwWbU8l2o (video tutorial image processing)
