@@ -11,5 +11,5 @@ How to Run The Program
 6. run .\src\apps.py
 
 cara lain
-1. run `Set-ExecutionPolicy Unrestricted -Scope Process`
+1. run `Set-ExecutionPolicy Unrestricted -Scope Process` {jika tidak bisa run script}
 2. run `.\run.bat`
