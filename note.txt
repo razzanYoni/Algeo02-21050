@@ -20,3 +20,8 @@ buat file .bat untuk run python atau buat shortcut exe
 https://youtu.be/5ohvgg1jyPQ (video tutorial real time web cam)
 https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 
+
+
+https://stackoverflow.com/questions/34993200/copy-complete-virtualenv-to-another-pc
+
+https://youtu.be/oXlwWbU8l2o (video tutorial image processing)

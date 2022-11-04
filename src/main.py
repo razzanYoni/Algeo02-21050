@@ -1,11 +1,17 @@
 import numpy as np
-from sympy import *
+from sympy from sympy import *
 
+
+def numpy_to_*
+import cv2 as cv
 
 def numpy_to_sympy(x):
-    return Matrix(x.tolist())
+(x):
+    return M   return Matrix(x.tolitrix(x.tolist())
 
-def sympy_to_numpy(x):
+deft())
+
+def symympy_to_numpy(x):
     return np.array(x).astype(np.float64)
 
 def printMatrix(x):
@@ -25,6 +31,29 @@ print()
 M_rref = M.rref()
 
 printMatrix(M_rref[0]) # matrix in reduced row echelon form
+print()
+
+print(M_rref[1]) # pivot columns
+print()y_to_numpy(x):
+    return np.array(x).astype(np.float64)
+
+def printMatrix(x):
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            print(x[i,j], end=' ')
+        print()
+
+M = np.matrix([[1,2,5], [3,4,6]])
+printMatrix(M)
+print()
+
+M = numpy_to_sympy(M)
+printMatrix(M)
+print()
+
+M_rref = M.rref()
+
+printMatrix(M_rref[0])
 print()
 
 print(M_rref[1]) # pivot columns
