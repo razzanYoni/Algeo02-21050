@@ -5,6 +5,7 @@ https://www.tutorialspoint.com/python/python_gui_programming.htm#:~:text=Tkinter
 
 https://stackoverflow.com/questions/34993200/copy-complete-virtualenv-to-another-pc
 
+
 https://youtu.be/oXlwWbU8l2o (video tutorial image processing)
 
 parser bisa pake sympy
@@ -24,4 +25,3 @@ https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 
 https://stackoverflow.com/questions/34993200/copy-complete-virtualenv-to-another-pc
 
-https://youtu.be/oXlwWbU8l2o (video tutorial image processing)
