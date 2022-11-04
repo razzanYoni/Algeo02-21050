@@ -61,13 +61,15 @@ while(True):
     # quitting button you may use any
     # desired button of your choice
     if cv.waitKey(1) & 0xFF == ord('q'):
-        cv.imwrite('./Photo/coba.jpg', frame) # save gambar berarti perlu count gambar di folder biar ga overwrite
+        vid.release()
+        cv.destroyAllWindows()
+        cv.imshow('image', frame)
+        cv.waitKey(0)
         break
 # After the loop release the cap object
-vid.release()
+
 # Destroy all the windows
-cv.destroyAllWindows()
 
+filename = input("Masukkan nama file: ")
+cv.imwrite(f'./Photo/{filename}.jpg', frame) # save gambar berarti perlu count gambar di folder biar ga overwrite
 
-cv.imshow('image', frame)
-cv.waitKey(0)
