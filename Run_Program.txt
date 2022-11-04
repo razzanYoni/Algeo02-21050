@@ -9,3 +9,7 @@ How to Run The Program
 7. CTRL + SHIFT + P to change the python interpreter to virtual environment
 5. In the terminal run `pip install -r requirements.txt`
 6. run .\src\apps.py
+
+cara lain
+1. run `Set-ExecutionPolicy Unrestricted -Scope Process`
+2. run `.\run.bat`
