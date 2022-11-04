@@ -6,3 +6,17 @@ https://www.tutorialspoint.com/python/python_gui_programming.htm#:~:text=Tkinter
 https://stackoverflow.com/questions/34993200/copy-complete-virtualenv-to-another-pc
 
 https://youtu.be/oXlwWbU8l2o (video tutorial image processing)
+
+parser bisa pake sympy
+
+https://www.geeksforgeeks.org/working-images-python/
+
+https://stackoverflow.com/questions/67873994/open-image-files-from-window-explorer-using-python-code
+
+https://www.codegrepper.com/search.php?answer_removed=1&q=how%20to%20load%20an%20image%20file%20in%20python%20with%20windows%20explorer
+
+buat file .bat untuk run python atau buat shortcut exe
+
+https://youtu.be/5ohvgg1jyPQ (video tutorial real time web cam)
+https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
+

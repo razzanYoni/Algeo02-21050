@@ -1,6 +1,6 @@
 import numpy as np
 from sympy import *
-import cv2 as cv
+
 
 def numpy_to_sympy(x):
     return Matrix(x.tolist())
@@ -24,7 +24,7 @@ print()
 
 M_rref = M.rref()
 
-printMatrix(M_rref[0])
+printMatrix(M_rref[0]) # matrix in reduced row echelon form
 print()
 
 print(M_rref[1]) # pivot columns
