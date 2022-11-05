@@ -1,0 +1,41 @@
+- UI/UX
+    Mock Up Solusi (Naufal)
+    Page (Egi) (Selasa):
+        Home page (awal masuk : root)
+        (page: dari gambar, realtime (bonus))
+    Button (Naufal):
+        Home (di page selain home page)
+        Insert Data 
+        Insert Image
+    Frame (Razzan) :
+        Display Data
+        Display Image
+        Result
+        Waktu Eksekusi
+    Input (bonus) :
+        ID utk realtime
+    Fungsi (bonus) :
+        Fungsi OpenCV (untuk realtime)
+
+    Deadline : Jumat, 11 November 2022
+
+- Olah Data Set 4.3.1
+    - Fungsi OpenCV foto nya dijadiin matriks
+    - Fungsi untuk apain foldernya
+
+- Eigen
+    - Mean (4.3.2)
+    - Selisih (4.3.3)
+    - Kovarian (4.3.4)
+    - Eigenvalue (4.3.5)
+    - Nilai EigenFace (4.3.6)
+    - Proses Identifikasi (4.3.7)
+    - disatuin jadi 1 fungsi utama
+
+    Langsung dibuat fungsi
+    Test di CLI dulu
+
+    Minimal Persentase Kecocokan :  
+    Reff :  https://jurnal.untan.ac.id/index.php/jcskommipa/article/download/9727/9500
+            https://www.geeksforgeeks.org/ml-face-recognition-using-eigenfaces-pca-algorithm/
+- Bonus (mudah ini)

@@ -1,3 +1,4 @@
-1. biar enak dibuat 2 folder, 1 folder untuk githubnya, 1 folder untuk lokal
-2. Di folder lokal ikutin Run_Program.txt 
-3. Nah kalo ada perubahan di py file nya, tinggal copy file nya ke folder github, terus add, commit, dan push
+1. run .\kerja.bat
+2. Kerjain program di folder lokal Jangan lupa aktifin virtualenv
+3. kalo udah run .\oper.bat
+4. kalo mau commit ke folder Algeo baru push ke github

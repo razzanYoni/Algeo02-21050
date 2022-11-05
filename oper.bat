@@ -1,2 +1,2 @@
 cd ..\
-xcopy /s .\lokal\program .\Algeo02-21050
+xcopy /s .\lokal\src\program .\Algeo02-21050\src\program
