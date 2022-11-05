@@ -1,21 +1,21 @@
 @REM kalo mau cepet push ke github tapi manual lebih baik
 @REM masih ERROR
-echo off
-git branch
-echo "Apakah sudah ada di dalam branch[y/n]?"
-set /p xyz =
+@REM echo off
+@REM git branch
+@REM echo "Apakah sudah ada di dalam branch[y/n]?"
+@REM set /p xyz =
 
-if /i "%xyz%" == "y" goto branch
-if /i "%xyz%"== "n" goto push
-:branch
-echo "Masukkan nama branch"
-set /p brc =  
-CALL git checkout -b "%brc%"
-goto push
-:push
-git branch
-set /p commit="Commit message: "
-git add .
-git commit -m "%commit%"
-@REM git push
-goto :end
+@REM if /i "%xyz%" == "y" goto branch
+@REM if /i "%xyz%"== "n" goto push
+@REM :branch
+@REM echo "Masukkan nama branch"
+@REM set /p brc =  
+@REM CALL git checkout -b "%brc%"
+@REM goto push
+@REM :push
+@REM git branch
+@REM set /p commit="Commit message: "
+@REM git add .
+@REM git commit -m "%commit%"
+@REM @REM git push
+@REM goto :end
