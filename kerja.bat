@@ -1,3 +1,4 @@
+echo off
 cd ..\
 mkdir lokal
 xcopy /s .\Algeo02-21050 .\lokal
