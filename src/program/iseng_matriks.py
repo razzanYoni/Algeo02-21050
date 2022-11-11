@@ -16,6 +16,7 @@ def printMatrix(x):
 
 M = np.matrix([[1,2,5], [3,4,6]])
 printMatrix(M)
+print("ini adalah panjang kolom", M.shape[1])
 print()
 
 M = numpy_to_sympy(M)

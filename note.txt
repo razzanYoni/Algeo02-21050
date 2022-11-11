@@ -25,3 +25,4 @@ https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 
 https://stackoverflow.com/questions/34993200/copy-complete-virtualenv-to-another-pc
 
+https://www.educba.com/prolog-recursion/
