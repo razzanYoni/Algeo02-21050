@@ -14,9 +14,25 @@ def printMatrix(x):
             print(x[i,j], end=' ')
         print()
 
-M = np.matrix([[1,2,5], [3,4,6]])
+M = np.matrix([[1,2,5], [30,21,8]])
 printMatrix(M)
-print("ini adalah panjang kolom", M.shape[1])
+print("ini adalah transpose")
+printMatrix(M.transpose())
+print()
+
+M2 = M.transpose()
+# print("perkalian matrix")
+# printMatrix(np.matmul(M, M2))
+# print()
+
+m1 = np.matmul(M2, M)
+print("hasil transpose")
+printMatrix((m1))
+print()
+
+m2 = np.matmul(M, M2)
+print("hasil transpose cara 2")
+printMatrix(m2.transpose())
 print()
 
 M = numpy_to_sympy(M)
