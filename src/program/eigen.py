@@ -23,8 +23,8 @@ def sumMatrix(M1, M2) :
     return M1
 
 # Penguranan antara 2 matrix
-def subtractMatrix(M1, M2) :
-    # I.S : Matrix M1 dan M2 terdefinisi dengan ukuran sama
+def subtractEigenMatrixInString(M1, M2) :
+    # I.S : Matrix M1 dan M2 terdefinisi dengan ukuran sama, M1 dan M2 adalah matrix yang berisi nilai string
     # F.S : Mengembalikan pengurangan dari matrix
 
     # KAMUS LOKAL
@@ -38,8 +38,60 @@ def subtractMatrix(M1, M2) :
     nCol = M1.shape[1]
     for i in range(nRow) :
         for j in range(nCol) :
-            M1[i,j] = M1[i,j] - M2[i,j]
+            if (isString(M1[i,j]) and i == j) :
+                M1[i,j] = M1[i,j] + ' - ' + M2[i,j]
+            else :
+                M1[i,j] = float(M1[i,j]) - float(M2[i,j])
+
     return M1
+
+# Konversi elemen matrix menjadi string
+def convertMatrixToString(Matrix) :
+    # I.S : Matrix terdefinisi
+    # F.S : Mengembalikan Matrix berelemen string
+
+    # KAMUS LOKAL
+    # MatResult : Matrix
+    # i,j : integer
+    # nCol : integer
+    # nRow : integer
+
+    # ALGORITMA
+    MatResult = np.zeros((Matrix.shape[0], Matrix.shape[1]), dtype=str)
+
+    nRow = Matrix.shape[0]
+    nCol = Matrix.shape[1]
+
+    for i in range(nRow) :
+        for j in range(nCol) :
+            MatResult[i,j] = str(Matrix[i,j])
+
+    return MatResult
+
+# Concatenate 2 matrix
+def concatenateMatrix(M1, M2) :
+    # I.S : Matrix M1 dan M2 terdefinisi dengan ukuran sama
+    # F.S : Mengembalikan konkatenansi secara horizontal dari matrix
+
+    # KAMUS LOKAL
+
+    # ALGORITMA
+    return np.concatenate((M1, M2), axis=1)
+
+
+# Menentukan apakah nilai tersebut string atau bukan
+def isString(val) :
+    # I.S val terdefinisi, val adalah sebuah value
+    # F.S mengembalikan nilai True jika val adalah string, False jika bukan
+
+    # KAMUS LOKAL
+
+    # ALGORITMA
+    try :
+        float(val)
+        return False
+    except ValueError :
+        return True
 
 # 4.3.2
 """Menghitung nilai tengah dari data"""
@@ -114,10 +166,39 @@ def getEigen(MatrixCovariance) :
     # F.S : Mengembalikan eigenvalue dan eigenvector dari matrix
 
     # KAMUS LOKAL
+    # MatrixS : Matrix {matrix hasil penguranan antara matrix covariance dengan matrix identitas}
+    # ArrOfEigenValue : Array of float {array of eigenvalue}
+    # n : integer {ukuran matrix}
+    # i, j : integer
     # eigenValue : array of float
     # eigenVector : array of array of float
 
     # ALGORITMA
+
+    """Menghitung eigenValue"""
+    n = MatrixCovariance.shape[0]
+
+    # Menghitung eigenvalue
+    
+    # Create a matrix of zeros
+    # unico lambda : \u03BB
+    MatrixEigenValue = np.zeros((n,n), dtype=str)
+    for i in range(n):
+        for j in range(n) :
+            if (i != j) :
+                MatrixEigenValue[i,j] = "0"
+            else :
+                MatrixEigenValue[i,j] = "\u03BB"
+
+    # Kurangkan MatrixEigenValue dengan MatrixCovariance
+    MatrixS = subtractEigenMatrixInString(MatrixEigenValue, convertMatrixToString(MatrixCovariance))
+
+    # Cari setiap eigenvalue
+    ArrOfEigenValue = []
+
+
+
+
     
 
     return eigenValue, eigenVector
