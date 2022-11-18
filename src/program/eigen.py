@@ -202,3 +202,90 @@ def getEigen(MatrixCovariance) :
     
 
     return eigenValue, eigenVector
+
+
+def getEigenFaceFromDataSet(path) :
+    # I.S : path terdefinisi
+    # F.S : Mengembalikan eigenFace dari dataset
+
+    # KAMUS LOKAL
+    # ArrayOfMatrix : array of Matrix DataSet
+    # matrixSum : Matrix
+    # matrixMedian : Matrix
+    # matrixCovariance : Matrix
+    # eigenValue : array of float
+    # eigenVector : array of array of float
+    # i : integer
+
+    # ALGORITMA
+
+    # Load DataSet
+    ArrOfMatrix = load(path)
+
+    # Hitung Nilai Tengah
+    matrixSum = np.zeros((ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
+    for i in range(len(ArrOfMatrix)) :
+        matrixSum = sumMatrix(matrixSum, ArrOfMatrix[i])
+    matrixMedian = getMedian(matrixSum, len(ArrOfMatrix))
+
+    # Hitung Selisih antara Training Image dengan Nilai Tengah
+    MatrixDifference = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
+    for i in range(len(ArrOfMatrix)) :
+        MatrixDifference[i] = DifferenceMatrix(ArrOfMatrix[i], matrixMedian)
+
+    # Hitung Kovarian
+    MatrixCovariance = getCovariance(MatrixDifference)
+
+    """Jangan Lupa diganti"""
+    # Hitung EigenValue dan EigenVector
+    eigenValue, eigenVector = getEigen(MatrixCovariance)
+    eigenValue = np.real(eigenValue)
+    eigenVector = np.real(eigenVector)
+
+    # Hitung Eigen Face
+    eigenFace = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
+    for i in range(len(ArrOfMatrix)) :
+        eigenFace[i] = np.matmul(MatrixDifference[i], eigenVector)
+    
+    return eigenFace, matrixMedian
+
+def getResult(eigenFaceOfDataSet, matrixMedianOfDataSet, path) :
+    # I.S : eigenFaceOfDataSet dan path terdefinisi
+    # F.S : Mengembalikan result kecocokan dari image yang diuji dengan dataset
+
+    # KAMUS LOKAL
+    # eigenFaceOfTestImage : Matrix
+    # result : float
+
+    # ALGORITMA
+
+    # Load Test Image
+    testImage = Img(path)
+
+    # Difference Matrix dari Test Image dengan Nilai Tengah
+    differenceImage = DifferenceMatrix(testImage, matrixMedianOfDataSet)
+
+    # Eigen Face dari Test Image
+    eigenFaceOfTestImage = np.matmul(differenceImage, eigenFaceOfDataSet.transpose())
+
+    # Hitung Eigen Distance
+    max = -9999
+    min = 9999
+
+    eigenDistanceOfTestImage = np.zeros((len(eigenFaceOfDataSet)))
+
+    for i in range(len(eigenFaceOfDataSet)) :
+        dummyMatrix = eigenFaceOfTestImage - eigenFaceOfDataSet[i]
+
+        for j in range(dummyMatrix.shape[0]) :
+            for k in range(dummyMatrix.shape[1]) :
+                eigenDistanceOfTestImage[i] += dummyMatrix[j,k]**2
+
+        if eigenDistanceOfTestImage[i] > max :
+            max = eigenDistanceOfTestImage[i]
+        if eigenDistanceOfTestImage[i] < min :
+            min = eigenDistanceOfTestImage[i]
+
+    result = 100 - ((min/max) * 100)
+
+    return result
