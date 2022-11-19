@@ -48,7 +48,7 @@ def load(dir) :
         else :
             continue
     return T
-
+    
 def Img(path) :
     # Mengembalikan array of normalized image dari path yang dimasukkan
     img = normalized(path)
