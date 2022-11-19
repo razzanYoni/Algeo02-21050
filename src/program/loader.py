@@ -20,8 +20,8 @@ def normalized(name) :
     
     # Wajah tidak terdeteksi
     if face is ():
-        cv2.imshow("face", img)
-        cv2.waitKey()
+        # cv2.imshow("face", img)
+        # cv2.waitKey()
         return None
 
     # Wajah terdeteksi
