@@ -2,6 +2,7 @@
 from PIL import Image
 import numpy as np
 import os
+from loader import *
 
 """Fungsi-fungsi Eigen"""
 # Jumlah dari 2 Matrix
@@ -206,7 +207,7 @@ def getEigen(MatrixCovariance) :
 
 def getEigenFaceFromDataSet(pathDir, pathImage) :
     # I.S : path terdefinisi
-    # F.S : Mengembalikan eigenFace dari dataset
+    # F.S : Mengembalikan nama file dengan eigen distance terkecil dan hasil foto
 
     # KAMUS LOKAL
     # ArrayOfMatrix : array of Matrix DataSet
