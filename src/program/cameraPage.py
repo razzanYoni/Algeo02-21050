@@ -2,17 +2,8 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog
 from PIL import ImageTk,Image
+import cv2 as cv
 
-
-
-def askDirectory(self):
-    
-    return filedialog.askdirectory(**self.dir_opt)
-
-
-def print():
-    l = tk.Label(inputFrame, text="Halo")
-    l.grid()
 
 def printImage():
     global inputDir
@@ -26,7 +17,40 @@ def printImage():
     tesImage = ctk.CTkLabel(master=showFrame, image=imageTes)
     tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
 
+def capture():
+    global tesImage
 
+    vid = cv.VideoCapture(0)
+    vid.set(3, 256)
+
+    
+    while(True):
+        # Capture the video frame
+        # by frame
+        ret, frame = vid.read()
+    
+        # Display the resulting frame
+        cv.imshow('frame', frame)
+        
+        # the 'q' button is set as the
+        # quitting button you may use any
+        # desired button of your choice
+        if cv.waitKey(1) & 0xFF == ord(' '):
+            vid.release()
+            cv.destroyAllWindows()
+            cv.imshow('image', frame)
+            cv.waitKey(0)
+            break
+    
+    
+    blue,green,red = cv.split(frame)
+    frame = cv.merge((red,green,blue))
+    color_converted = Image.fromarray(frame)
+    imageTes = ImageTk.PhotoImage(image=color_converted)
+
+    tesImage.image = imageTes
+    tesImage = ctk.CTkLabel(master=showFrame, image=imageTes)
+    tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
     
 
 
@@ -85,9 +109,9 @@ trainInput.grid(column=1, row=3, sticky="N", pady=30)
 trainTitle = ctk.CTkLabel(master=inputFrame, text="Training Dataset : ", text_font="Tahoma", text_color="#0E5E6F")
 trainTitle.grid(column=0, row=3, sticky="N", pady=30)
 
-tesInput = ctk.CTkButton(master=inputFrame, text="Choose File", width=150, height=40, corner_radius=10, command=printImage)
+tesInput = ctk.CTkButton(master=inputFrame, text="Open Camera", width=150, height=40, corner_radius=10, command=capture)
 tesInput.grid(column=1, row=4, sticky="N")
-tesTitle = ctk.CTkLabel(master=inputFrame, text="Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
+tesTitle = ctk.CTkLabel(master=inputFrame, text="Capture Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
 tesTitle.grid(column=0, row=4, sticky="N")
 
 
