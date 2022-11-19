@@ -48,6 +48,15 @@ def load(dir) :
         else :
             continue
     return T
+    
+def Img(path) :
+    # Mengembalikan array of normalized image dari path yang dimasukkan
+    img = normalized(path)
+
+    if (img is not None) :
+        return img
+    else :
+        return None
 
 # for image in T:  
 # arr = normalized(r"./Data/pins_Adriana Lima/Adriana Lima0_0.jpg")
