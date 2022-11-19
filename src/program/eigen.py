@@ -246,7 +246,7 @@ def getEigenFaceFromDataSet(pathDir, pathImage) :
     # Hitung Eigen Face
     eigenFaceOfDataSet = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
     for i in range(len(ArrOfMatrix)) :
-        eigenFaceOfDataSet[i] = np.matmul(MatrixDifference[i], eigenVector)
+        eigenFaceOfDataSet[i] = np.matmul(eigenVector,MatrixDifference[i])
 
     # Load Test Image
     testImage = Img(pathImage)
@@ -255,7 +255,8 @@ def getEigenFaceFromDataSet(pathDir, pathImage) :
     differenceImage = DifferenceMatrix(testImage, matrixMedianOfDataSet)
 
     # Eigen Face dari Test Image
-    eigenFaceOfTestImage = np.matmul(differenceImage, eigenFaceOfDataSet.transpose())
+    eigenFaceOfTestImage = np.matmul(eigenVector, differenceImage)
+    eigenFaceOfTestImage = np.real(eigenFaceOfTestImage)
 
     # Hitung Eigen Distance
     min = 99999999999
