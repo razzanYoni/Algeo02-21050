@@ -275,8 +275,15 @@ def getEigenFaceFromDataSet(pathDir, pathImage) :
             min = eigenDistanceOfTestImage[i]
             minIdx = i
 
-    photoResult = Image.fromarray(ArrOfMatrix[minIdx])
+    imgMatrix = ArrOfMatrix[minIdx]
+
+    # blue,green,red = cv.split(imgMatrix)
+    # imgMatrix = cv.merge((red,green,blue))
+    color_img = cv.cvtColor(imgMatrix, cv.COLOR_GRAY2RGB)
+
+    photoResult = Image.fromarray(color_img)
+
     fileName = os.listdir(pathDir)[minIdx]
 
 
-    return photoResult, fileName
+    return photoResult, fileName, pathDir + '/' + fileName

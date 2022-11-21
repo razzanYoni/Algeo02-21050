@@ -16,11 +16,29 @@ root.title("BosenTuru") #title window
 root.geometry("1280x720") # window size
 root.configure(bg="#ffefd6")
 
+def computeResult():
+    global resultImage
+
+    photo, nama, pathRes = getEigenFaceFromDataSet(direc, inputDir)
+    
+    # blue,green,red = cv.split(photo)
+    # photo = cv.merge((red,green,blue))
+    # colorConv = Image.fromarray(photo)
+    img = Image.open(pathRes)
+    imageSized = img.resize((256, 256))
+    imageRes = ImageTk.PhotoImage(imageSized)
+    resultImage.image = imageRes
+    resultImage.configure(image=imageRes)
+    # resultImage = ctk.CTkLabel(master=showFrame, image=resultImage)
+    # resultImage.grid(column=1, row=1, sticky="E",pady=50, padx=50)
+    
+    result.configure(text=nama, text_color="green")
+
 def capture():
     global tesImage
 
     vid = cv.VideoCapture(0)
-    vid.set(3, 256)
+    #vid.set(3, 256)
 
     
     while(True):
@@ -41,12 +59,11 @@ def capture():
             cv.waitKey(0)
             break
     
-    
     blue,green,red = cv.split(frame)
     frame = cv.merge((red,green,blue))
     color_converted = Image.fromarray(frame)
-    imageTes = ImageTk.PhotoImage(image=color_converted)
 
+    imageTes = ImageTk.PhotoImage(image=color_converted)
     tesImage.image = imageTes
     tesImage = ctk.CTkLabel(master=showFrame, image=imageTes)
     tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
@@ -62,7 +79,9 @@ def printImage():
     global tesImage
 
     inputDir =filedialog.askopenfilename()
-    imageTes = ImageTk.PhotoImage(Image.open(inputDir))
+    img  = Image.open(inputDir)
+    imageSized = img.resize((256, 256))
+    imageTes = ImageTk.PhotoImage(imageSized)
     # lbl = ctk.CTkLabel(master=showFrame, image=imageTes)
     # lbl.grid()
     tesImage.image = imageTes
@@ -72,6 +91,8 @@ def printImage():
 def page2():
     global showFrame
     global tesImage
+    global result
+    global resultImage
 
     homeFrameMain.destroy()
 
@@ -123,7 +144,7 @@ def page2():
     # fileFrame = ctk.CTkFrame(master=inputFrame, )
 
 
-    trainInput = ctk.CTkButton(master=inputFrame, text="Choose File", width=150, height=40, corner_radius=10, command=askDirectory)
+    trainInput = ctk.CTkButton(master=inputFrame, text="Choose Folder", width=150, height=40, corner_radius=10, command=askDirectory)
     trainInput.grid(column=1, row=3, sticky="N", pady=50)
     trainTitle = ctk.CTkLabel(master=inputFrame, text="Training Dataset : ", text_font="Tahoma", text_color="#0E5E6F")
     trainTitle.grid(column=0, row=3, sticky="N", pady=50)
@@ -133,12 +154,14 @@ def page2():
     tesTitle = ctk.CTkLabel(master=inputFrame, text="Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
     tesTitle.grid(column=0, row=4, sticky="N")
 
-    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10)
+    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10, command=computeResult)
     computeButton.grid(column=0, row=5, columnspan=2, pady=80)
 
 def page3():
     global showFrame
     global tesImage
+    global result
+    global resultImage
 
     homeFrameMain.destroy()
 
@@ -187,7 +210,7 @@ def page3():
 
     # ________________ BUTTON ________________
 
-    trainInput = ctk.CTkButton(master=inputFrame, text="Choose File", width=150, height=40, corner_radius=10, command=askDirectory)
+    trainInput = ctk.CTkButton(master=inputFrame, text="Choose Folder", width=150, height=40, corner_radius=10, command=askDirectory)
     trainInput.grid(column=1, row=3, sticky="N", pady=50)
     trainTitle = ctk.CTkLabel(master=inputFrame, text="Training Dataset : ", text_font="Tahoma", text_color="#0E5E6F")
     trainTitle.grid(column=0, row=3, sticky="N", pady=50)
@@ -197,8 +220,11 @@ def page3():
     tesTitle = ctk.CTkLabel(master=inputFrame, text="Capture Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
     tesTitle.grid(column=0, row=4, sticky="N")
 
-    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10)
-    computeButton.grid(column=0, row=5, columnspan=2, pady=80)
+    tipText = ctk.CTkLabel(master=inputFrame, text="Place your head in the middle dan press SPACE to capture", text_color="black")
+    tipText.grid(column=0, row=5, columnspan=2, pady=30)
+
+    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10, command=computeResult)
+    computeButton.grid(column=0, row=6, columnspan=2, pady=0)
 
 
 
