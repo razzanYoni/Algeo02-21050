@@ -5,6 +5,38 @@ import cv2
 import os
 
 from numpy import linalg
+
+def normalized_obj_img(image) :
+    # Mengembalikan matrix dari image "name" yang sudah dinormalisasi
+    # yaitu di crop di bagian muka dan berukuran 256 x 256
+
+
+    # Membaca image dan mengubah dalam bentuk grayscale
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Mendeteksi wajah
+    face_cascade = face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    face = face_cascade.detectMultiScale(img, 1.1, 4)
+    
+    # Wajah tidak terdeteksi
+    if face is ():
+        # cv2.imshow("face", img)
+        # cv2.waitKey()
+        return None
+
+    # Wajah terdeteksi
+    for (x, y, w, h) in face:
+        # Crop Face
+        # w adalah lebar muka
+        # h adalah tinggi muka
+        if (w >= h) :
+            face = img[y:y+w, x:x+w]
+        else :
+            face = img[y:y+h, x:x+h]
+    face = Image.fromarray(face).resize((256,256))
+
+    return np.array(face)
+
 def normalized(name) :
     # Mengembalikan matrix dari image "name" yang sudah dinormalisasi
     # yaitu di crop di bagian muka dan berukuran 256 x 256
@@ -58,6 +90,14 @@ def Img(path) :
     else :
         return None
 
+def Img2(image) :
+    # Mengembalikan array of normalized image dari path yang dimasukkan
+    img = normalized_obj_img(image)
+
+    if (img is not None) :
+        return img
+    else :
+        return None
 # for image in T:  
 # arr = normalized(r"./Data/pins_Adriana Lima/Adriana Lima0_0.jpg")
 # printMatrix(arr)

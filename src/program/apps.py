@@ -4,9 +4,10 @@ import customtkinter as ctk
 from tkinter import filedialog
 from PIL import ImageTk,Image
 import cv2 as cv
+import numpy as np
 
 # from data_processing import *
-# from eigen import *
+from eigen import *
 
 
 root = tk.Tk()
@@ -34,8 +35,27 @@ def computeResult():
     
     result.configure(text=nama, text_color="green")
 
+def computeCamera():
+    global resultImage
+
+    photo, nama, pathRes = getEigenFaceFromCamera(direc, framearr)
+    
+    # blue,green,red = cv.split(photo)
+    # photo = cv.merge((red,green,blue))
+    # colorConv = Image.fromarray(photo)
+    img = Image.open(pathRes)
+    imageSized = img.resize((256, 256))
+    imageRes = ImageTk.PhotoImage(imageSized)
+    resultImage.image = imageRes
+    resultImage.configure(image=imageRes)
+    # resultImage = ctk.CTkLabel(master=showFrame, image=resultImage)
+    # resultImage.grid(column=1, row=1, sticky="E",pady=50, padx=50)
+    
+    result.configure(text=nama, text_color="green")
+
 def capture():
     global tesImage
+    global framearr
 
     vid = cv.VideoCapture(0)
     #vid.set(3, 256)
@@ -58,12 +78,17 @@ def capture():
             cv.imshow('image', frame)
             cv.waitKey(0)
             break
-    
-    blue,green,red = cv.split(frame)
-    frame = cv.merge((red,green,blue))
-    color_converted = Image.fromarray(frame)
 
-    imageTes = ImageTk.PhotoImage(image=color_converted)
+
+    framearr = np.array(frame)
+
+    blue,green,red = cv.split(frame)
+    frame_split = cv.merge((red,green,blue))
+    color_converted = Image.fromarray(frame_split)
+
+    image_resized = color_converted.resize((256,256))
+
+    imageTes = ImageTk.PhotoImage(image=image_resized)
     tesImage.image = imageTes
     tesImage = ctk.CTkLabel(master=showFrame, image=imageTes)
     tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
@@ -220,10 +245,10 @@ def page3():
     tesTitle = ctk.CTkLabel(master=inputFrame, text="Capture Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
     tesTitle.grid(column=0, row=4, sticky="N")
 
-    tipText = ctk.CTkLabel(master=inputFrame, text="Place your head in the middle dan press SPACE to capture", text_color="black")
+    tipText = ctk.CTkLabel(master=inputFrame, text="Place your head in the middle dan press SPACE to capture. Do not use mask.", text_color="black")
     tipText.grid(column=0, row=5, columnspan=2, pady=30)
 
-    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10, command=computeResult)
+    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10, command=computeCamera)
     computeButton.grid(column=0, row=6, columnspan=2, pady=0)
 
 
