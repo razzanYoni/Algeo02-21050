@@ -205,6 +205,90 @@ def getEigen(MatrixCovariance) :
 
     return eigenValue, eigenVector
 
+def getEigenFaceFromCamera(pathDir, image) :
+    # I.S : path terdefinisi
+    # F.S : Mengembalikan nama file dengan eigen distance terkecil dan hasil foto
+
+    # KAMUS LOKAL
+    # ArrayOfMatrix : array of Matrix DataSet
+    # matrixSum : Matrix
+    # matrixMedian : Matrix
+    # matrixCovariance : Matrix
+    # eigenValue : array of float
+    # eigenVector : array of array of float
+    # i : integer
+
+    # ALGORITMA
+
+    # Load DataSet
+    ArrOfMatrix = load(pathDir)
+
+    # Hitung Nilai Tengah
+    matrixSum = np.zeros((ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
+    for i in range(len(ArrOfMatrix)) :
+        matrixSum = sumMatrix(matrixSum, ArrOfMatrix[i])
+    matrixMedianOfDataSet = getMedian(matrixSum, len(ArrOfMatrix))
+
+    # Hitung Selisih antara Training Image dengan Nilai Tengah
+    MatrixDifference = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
+    for i in range(len(ArrOfMatrix)) :
+        MatrixDifference[i] = DifferenceMatrix(ArrOfMatrix[i], matrixMedianOfDataSet)
+
+    # Hitung Kovarian
+    MatrixCovariance = getCovariance(MatrixDifference)
+
+    """Jangan Lupa diganti"""
+    # Hitung EigenValue dan EigenVector
+    eigenValue, eigenVector = getEigen(MatrixCovariance)
+    eigenValue = np.real(eigenValue)
+    eigenVector = np.real(eigenVector)
+
+    # Hitung Eigen Face
+    eigenFaceOfDataSet = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
+    for i in range(len(ArrOfMatrix)) :
+        eigenFaceOfDataSet[i] = np.matmul(eigenVector,MatrixDifference[i])
+
+    # Load Test Image
+    testImage = Img2(image)
+
+
+    # Difference Matrix dari Test Image dengan Nilai Tengah
+    differenceImage = DifferenceMatrix(testImage, matrixMedianOfDataSet)
+
+    # Eigen Face dari Test Image
+    eigenFaceOfTestImage = np.matmul(eigenVector, differenceImage)
+    eigenFaceOfTestImage = np.real(eigenFaceOfTestImage)
+
+    # Hitung Eigen Distance
+    min = 99999999999
+    minIdx = -1
+
+    eigenDistanceOfTestImage = np.zeros((len(eigenFaceOfDataSet)))
+
+    for i in range(len(eigenFaceOfDataSet)) :
+        dummyMatrix = eigenFaceOfTestImage - eigenFaceOfDataSet[i]
+
+        for j in range(dummyMatrix.shape[0]) :
+            for k in range(dummyMatrix.shape[1]) :
+                eigenDistanceOfTestImage[i] += dummyMatrix[j,k]**2
+
+        if eigenDistanceOfTestImage[i] < min :
+            min = eigenDistanceOfTestImage[i]
+            minIdx = i
+
+    imgMatrix = ArrOfMatrix[minIdx]
+
+    # blue,green,red = cv.split(imgMatrix)
+    # imgMatrix = cv.merge((red,green,blue))
+    color_img = cv.cvtColor(imgMatrix, cv.COLOR_GRAY2RGB)
+
+    photoResult = Image.fromarray(color_img)
+
+    fileName = os.listdir(pathDir)[minIdx]
+
+
+    return photoResult, fileName, pathDir + '/' + fileName
+
 def getEigenFaceFromDataSet(pathDir, pathImage) :
     # I.S : path terdefinisi
     # F.S : Mengembalikan nama file dengan eigen distance terkecil dan hasil foto
