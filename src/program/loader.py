@@ -1,10 +1,18 @@
 from PIL import Image
 import numpy as np
-from iseng_matriks import *
 import cv2
 import os
 
 from numpy import linalg
+
+def get_name(string):
+    result = ''
+    for char in string:
+        if char.isalpha():
+            result += char
+    return result.lower()
+
+
 def normalized(name) :
     # Mengembalikan matrix dari image "name" yang sudah dinormalisasi
     # yaitu di crop di bagian muka dan berukuran 256 x 256
@@ -35,7 +43,7 @@ def normalized(name) :
             face = img[y:y+h, x:x+h]
     face = Image.fromarray(face).resize((256,256))
 
-    return np.array(face)
+    return np.array(face, dtype=np.uint32)
 
 def load(dir) :
     # Mengembalikan array of normalized image dari directory yang dimasukkan
@@ -44,7 +52,9 @@ def load(dir) :
         image = (dir + r'/' + file)
         array = normalized(image)
         if (array is not None) :
-            T.append(array)
+            temp = [get_name(file), array]
+            T.append(temp)
+
         else :
             continue
     return T
@@ -58,17 +68,3 @@ def Img(path) :
     else :
         return None
 
-# for image in T:  
-# arr = normalized(r"./Data/pins_Adriana Lima/Adriana Lima0_0.jpg")
-# printMatrix(arr)
-# cv2.imshow("face", arr)
-# cv2.waitKey()
-
-# print(len(normalized(r"./Data/pins_Adriana Lima/Adriana Lima0_0.jpg")))
-# def load(repository) :
-
-# // matrix harus selalu kotak
-# // uniform 256 x 256
-# image = normalized(r"./Data/pins_Adriana Lima/Adriana Lima0_0.jpg")
-# cv2.imshow("face", image)
-# cv2.waitKey()
