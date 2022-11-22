@@ -1,5 +1,0 @@
-Library yang dipakai dan kegunaannya
-numpy : untuk mengolah data numerik, matrix, dan array
-sympy : parser, eselon
-cv2 : untuk mengolah citra
-Tkinter : untuk membuat GUI

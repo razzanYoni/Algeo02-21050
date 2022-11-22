@@ -1,4 +1,0 @@
-1. run .\kerja.bat
-2. Kerjain program di folder lokal Jangan lupa aktifin virtualenv
-3. kalo udah run .\oper.bat
-4. kalo mau commit ke folder Algeo baru push ke github
