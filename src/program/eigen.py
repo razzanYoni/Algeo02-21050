@@ -3,209 +3,52 @@ from PIL import Image
 import numpy as np
 import os
 from loader import *
+import sys
+from pandas import DataFrame
+import cv2
+import matplotlib.pyplot as plt
 
 """Fungsi-fungsi Eigen"""
-# Jumlah dari 2 Matrix
-def sumMatrix(M1, M2) : 
-    # I.S : Matrix terdefinisi dnegan ukuran sama
-    # F.S : Mengembalikan jumlah dari matrix
+def qr_hr(A, dtype = float):
+    """
+    O(2m^3) for given m*m matrix
+    Fungsi  : mendekomposisi A menjadi Q * R dengan Q adalah matrix orthogonal dan R adalah  
+        matrix segitiga atas, menggunakan metode Householder Reflection
+    reff :https://rpubs.com/aaronsc32/qr-decomposition-householder
+    Input A : matrix of float
+    Output  : tuple of matrix (Q, R) 
+    """
+
+    (num_row, num_col) = np.shape(A)
+    Q = np.eye(num_row)
+    R = np.copy(A)    
+    for n in range (num_col):
+        H = np.eye(num_row)
+        x = R[n:, n]
+        e = np.zeros(len(x))
+        e[0] = 1
+        v = x + np.sign(x[0]) * np.linalg.norm(x) * e
+        H[n:, n:] = np.eye(len(x)) - 2 * (np.outer(v,v))/v.dot(v)
+        Q = Q.dot(H)
+        R = H.dot(R)
+    return Q, R
     
-    # KAMUS LOKAL
-    # i : integer
-    # j : integer
-    # nCol : integer
-    # nRow : integer
+def eval_evec(A, iter = 50):
+    """
+    Fungsi  : mencari eigen value dari matrix A yang diberikan dengan metode Q R iteration
+    reff    : https://www.physicsforums.com/threads/how-do-i-numerically-find-eigenvectors-for-given-eigenvalues.561763/
+    Input A : matrix of float (prekondisi: matrix simetris agar approximasi optimal)
+    Output  : List of float (list of eigen value dari A)
+    """
+    Temp = np.copy(A)
+    evec = np.eye(len(A))
+    for _ in range (iter):
+        (Q, R) = qr_hr(Temp)
+        evec = evec.dot(Q)
+        Temp = R.dot(Q)
+    return [Temp[i][i] for i in range (len(Temp))], evec
 
-    # ALGORITMA
-    nRow = M2.shape[0]
-    nCol = M1.shape[1]
-    for i in range(nRow) :
-        for j in range(nCol) :
-            M1[i,j] = M1[i,j] + M2[i,j]
-    return M1
-
-# Penguranan antara 2 matrix
-def subtractEigenMatrixInString(M1, M2) :
-    # I.S : Matrix M1 dan M2 terdefinisi dengan ukuran sama, M1 dan M2 adalah matrix yang berisi nilai string
-    # F.S : Mengembalikan pengurangan dari matrix
-
-    # KAMUS LOKAL
-    # i : integer
-    # j : integer
-    # nCol : integer
-    # nRow : integer
-
-    # ALGORITMA
-    nRow = M1.shape[0]
-    nCol = M1.shape[1]
-    for i in range(nRow) :
-        for j in range(nCol) :
-            if (isString(M1[i,j]) and i == j) :
-                M1[i,j] = M1[i,j] + ' - ' + M2[i,j]
-            else :
-                M1[i,j] = float(M1[i,j]) - float(M2[i,j])
-
-    return M1
-
-# Konversi elemen matrix menjadi string
-def convertMatrixToString(Matrix) :
-    # I.S : Matrix terdefinisi
-    # F.S : Mengembalikan Matrix berelemen string
-
-    # KAMUS LOKAL
-    # MatResult : Matrix
-    # i,j : integer
-    # nCol : integer
-    # nRow : integer
-
-    # ALGORITMA
-    MatResult = np.zeros((Matrix.shape[0], Matrix.shape[1]), dtype=str)
-
-    nRow = Matrix.shape[0]
-    nCol = Matrix.shape[1]
-
-    for i in range(nRow) :
-        for j in range(nCol) :
-            MatResult[i,j] = str(Matrix[i,j])
-
-    return MatResult
-
-# Concatenate 2 matrix
-def concatenateMatrix(M1, M2) :
-    # I.S : Matrix M1 dan M2 terdefinisi dengan ukuran sama
-    # F.S : Mengembalikan konkatenansi secara horizontal dari matrix
-
-    # KAMUS LOKAL
-
-    # ALGORITMA
-    return np.concatenate((M1, M2), axis=1)
-
-
-# Menentukan apakah nilai tersebut string atau bukan
-def isString(val) :
-    # I.S val terdefinisi, val adalah sebuah value
-    # F.S mengembalikan nilai True jika val adalah string, False jika bukan
-
-    # KAMUS LOKAL
-
-    # ALGORITMA
-    try :
-        float(val)
-        return False
-    except ValueError :
-        return True
-
-# 4.3.2
-"""Menghitung nilai tengah dari data"""
-# Mengembalikan nilai tengah dari matrix
-def getMedian(M, nData) :
-    # I.S : Matrix dan nData terdefinisi
-    # F.S : Mengembalikan nilai tengah dari matrix
-
-    # KAMUS LOKAL
-    # i : integer
-    # j : integer
-    # nCol : integer
-    # nRow : integer
-
-    # ALGORITMA
-    nRow = M.shape[0]
-    nCol = M.shape[1]
-    for i in range(nRow) :
-        for j in range(nCol) :
-            M[i,j] = M[i,j] / nData
-    return M
-
-# 4.3.3
-"""Menghitung Selisih antara Training Image dengan Nilai Tengah"""
-# Pasti positif kah?
-def DifferenceMatrix(MTrainingImage,MNilaiTengah) :
-    # I.S : Matrix MTrainingImage dan MNilaiTengah terdefinisi dengan ukuran sama
-    # F.S : Mengembalikan selisih dari matrix
-
-    # KAMUS LOKAL
-    # i : integer
-    # j : integer
-    # nCol : integer
-    # nRow : integer
-
-    # ALGORITMA
-    nRow = MTrainingImage.shape[0]
-    nCol = MTrainingImage.shape[1]
-    for i in range(nRow) :
-        for j in range(nCol) :
-            MTrainingImage[i,j] = abs(MTrainingImage[i,j] - MNilaiTengah[i,j])
-
-    return MTrainingImage
-
-# 4.3.4
-"""Hitung Kovarian"""
-# Menghitung kovarian dari matrix
-def getCovariance(ArrayOfMatrix) :
-    # I.S : ArrayOfMatrix terdefinisi, ArrayOfMatrix sudah berisikan Matrix Selisih dari Training Image dengan Nilai Tengah (dari 4.3.3)
-    # F.S : Mengembalikan kovarian dari matrix
-
-    # KAMUS LOKAL
-    # i : integer
-    # length : integer
-
-    # ALGORITMA
-    length = len(ArrayOfMatrix)
-    for i in range(length) :
-        ArrayOfMatrix[i] = np.matmul(ArrayOfMatrix[i].transpose(),ArrayOfMatrix[i])
-
-    MatrixResult = ArrayOfMatrix[0]
-    for i in range(1,length) :
-        MatrixResult = sumMatrix(MatrixResult,ArrayOfMatrix[i])
-
-    return MatrixResult
-
-# 4.3.5
-"""Hitung EigenValue dan EigenVector"""
-# Menghitung eigenvalue dan eigenvector dari matrix
-def getEigen(MatrixCovariance) :
-    # I.S : MatrixCovariance terdefinisi
-    # F.S : Mengembalikan eigenvalue dan eigenvector dari matrix
-
-    # KAMUS LOKAL
-    # MatrixS : Matrix {matrix hasil penguranan antara matrix covariance dengan matrix identitas}
-    # ArrOfEigenValue : Array of float {array of eigenvalue}
-    # n : integer {ukuran matrix}
-    # i, j : integer
-    # eigenValue : array of float
-    # eigenVector : array of array of float
-
-    # ALGORITMA
-
-    """Menghitung eigenValue"""
-    n = MatrixCovariance.shape[0]
-
-    # Menghitung eigenvalue
-    
-    # Create a matrix of zeros
-    # unico lambda : \u03BB
-    MatrixEigenValue = np.zeros((n,n), dtype=str)
-    for i in range(n):
-        for j in range(n) :
-            if (i != j) :
-                MatrixEigenValue[i,j] = "0"
-            else :
-                MatrixEigenValue[i,j] = "\u03BB"
-
-    # Kurangkan MatrixEigenValue dengan MatrixCovariance
-    MatrixS = subtractEigenMatrixInString(MatrixEigenValue, convertMatrixToString(MatrixCovariance))
-
-    # Cari setiap eigenvalue
-    ArrOfEigenValue = []
-
-    eigenValue, eigenVector = np.linalg.eig(MatrixCovariance)
-
-
-    
-
-    return eigenValue, eigenVector
-
-def getEigenFaceFromCamera(pathDir, image) :
+def getResultEigenFaceFromImageFile(pathDir, pathImage) :
     # I.S : path terdefinisi
     # F.S : Mengembalikan nama file dengan eigen distance terkecil dan hasil foto
 
@@ -223,151 +66,98 @@ def getEigenFaceFromCamera(pathDir, image) :
     # Load DataSet
     ArrOfMatrix = load(pathDir)
 
-    # Hitung Nilai Tengah
-    matrixSum = np.zeros((ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
-    for i in range(len(ArrOfMatrix)) :
-        matrixSum = sumMatrix(matrixSum, ArrOfMatrix[i])
-    matrixMedianOfDataSet = getMedian(matrixSum, len(ArrOfMatrix))
+    # Ubah menjadi n^2
+    ArrOfVector = np.array([np.array(i).flatten('F') for i in ArrOfMatrix]).T
 
-    # Hitung Selisih antara Training Image dengan Nilai Tengah
-    MatrixDifference = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
-    for i in range(len(ArrOfMatrix)) :
-        MatrixDifference[i] = DifferenceMatrix(ArrOfMatrix[i], matrixMedianOfDataSet)
+    # Hitung Mean
+    mean = np.mean(ArrOfMatrix, axis = 0)
+    meanFlatten = mean.flatten()
 
-    # Hitung Kovarian
-    MatrixCovariance = getCovariance(MatrixDifference)
+    # Hitung Difference
+    ArrOfDiff = ArrOfMatrix - mean
+    dimension = len(ArrOfVector[0])
+    ArrOfDiffVec = np.array([ArrOfVector[:,i] - meanFlatten for i in range (dimension)]).T
 
-    """Jangan Lupa diganti"""
-    # Hitung EigenValue dan EigenVector
-    eigenValue, eigenVector = getEigen(MatrixCovariance)
-    eigenValue = np.real(eigenValue)
-    eigenVector = np.real(eigenVector)
+    # Hitung Covariance
+    MatrixCovariance = np.matmul(ArrOfDiffVec.T, ArrOfDiffVec)
+
+    # Hitung Eigen
+    eigenValue, eigenVector = eval_evec(MatrixCovariance)
 
     # Hitung Eigen Face
-    eigenFaceOfDataSet = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
-    for i in range(len(ArrOfMatrix)) :
-        eigenFaceOfDataSet[i] = np.matmul(eigenVector,MatrixDifference[i])
+    eigenFace = []
 
-    # Load Test Image
-    testImage = Img2(image)
+    for i in range(len(ArrOfDiffVec[0])) :
+        u = np.zeros((len(ArrOfDiff[0]), len(ArrOfDiff[0])))
+        for j in range(len(ArrOfDiffVec[0])) :
+            u += eigenVector[i][j] * ArrOfDiff[j]
+        eigenFace.append(u.flatten('F'))
+    eigenFace = np.array(eigenFace)
+    eigenFace = eigenFace.T
+    
 
+    # eigenFace = np.array([i/(i.sum()) for i in eigenFace])
 
-    # Difference Matrix dari Test Image dengan Nilai Tengah
-    differenceImage = DifferenceMatrix(testImage, matrixMedianOfDataSet)
-
-    # Eigen Face dari Test Image
-    eigenFaceOfTestImage = np.matmul(eigenVector, differenceImage)
-    eigenFaceOfTestImage = np.real(eigenFaceOfTestImage)
-
-    # Hitung Eigen Distance
-    min = 99999999999
-    minIdx = -1
-
-    eigenDistanceOfTestImage = np.zeros((len(eigenFaceOfDataSet)))
-
-    for i in range(len(eigenFaceOfDataSet)) :
-        dummyMatrix = eigenFaceOfTestImage - eigenFaceOfDataSet[i]
-
-        for j in range(dummyMatrix.shape[0]) :
-            for k in range(dummyMatrix.shape[1]) :
-                eigenDistanceOfTestImage[i] += dummyMatrix[j,k]**2
-
-        if eigenDistanceOfTestImage[i] < min :
-            min = eigenDistanceOfTestImage[i]
-            minIdx = i
-
-    imgMatrix = ArrOfMatrix[minIdx]
-
-    # blue,green,red = cv.split(imgMatrix)
-    # imgMatrix = cv.merge((red,green,blue))
-    color_img = cv.cvtColor(imgMatrix, cv.COLOR_GRAY2RGB)
-
-    photoResult = Image.fromarray(color_img)
-
-    fileName = os.listdir(pathDir)[minIdx]
+    # TEST EIGEN FACE
+    # for i in range (len(eigenFace)):
+    #     plt.imshow(eigenFace[i], cmap="gray")
+    #     plt.show()
 
 
-    return photoResult, fileName, pathDir + '/' + fileName
+    # Hitung weight DataSet
+    M = len(eigenVector)
+    flattenDimension = len(ArrOfDiffVec[0])
+    weight = []
+    for i in range(len(ArrOfDiffVec[0])) :
+        tempDifference = ArrOfDiffVec[:,i]
+        comb = []
+        for j in range(len(eigenFace[0])) :
+            tempEigFace = eigenFace[:,j]
+            dot = np.matmul(tempEigFace, tempDifference)
+            comb.append(dot)
+        weight.append(comb)
 
-def getEigenFaceFromDataSet(pathDir, pathImage) :
-    # I.S : path terdefinisi
-    # F.S : Mengembalikan nama file dengan eigen distance terkecil dan hasil foto
+    weight = np.array(weight)
+    # temp = np.zeros((256,256))
+    # for i in range(M):
+    #     temp += weight[0][i] * eigenFace[i,:]
+    # plt.imshow(temp, cmap="gray")
+    # plt.show()
 
-    # KAMUS LOKAL
-    # ArrayOfMatrix : array of Matrix DataSet
-    # matrixSum : Matrix
-    # matrixMedian : Matrix
-    # matrixCovariance : Matrix
-    # eigenValue : array of float
-    # eigenVector : array of array of float
-    # i : integer
-
-    # ALGORITMA
-
-    # Load DataSet
-    ArrOfMatrix = load(pathDir)
-
-    # Hitung Nilai Tengah
-    matrixSum = np.zeros((ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
-    for i in range(len(ArrOfMatrix)) :
-        matrixSum = sumMatrix(matrixSum, ArrOfMatrix[i])
-    matrixMedianOfDataSet = getMedian(matrixSum, len(ArrOfMatrix))
-
-    # Hitung Selisih antara Training Image dengan Nilai Tengah
-    MatrixDifference = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
-    for i in range(len(ArrOfMatrix)) :
-        MatrixDifference[i] = DifferenceMatrix(ArrOfMatrix[i], matrixMedianOfDataSet)
-
-    # Hitung Kovarian
-    MatrixCovariance = getCovariance(MatrixDifference)
-
-    """Jangan Lupa diganti"""
-    # Hitung EigenValue dan EigenVector
-    eigenValue, eigenVector = getEigen(MatrixCovariance)
-    eigenValue = np.real(eigenValue)
-    eigenVector = np.real(eigenVector)
-
-    # Hitung Eigen Face
-    eigenFaceOfDataSet = np.zeros((len(ArrOfMatrix), ArrOfMatrix[0].shape[0], ArrOfMatrix[0].shape[1]))
-    for i in range(len(ArrOfMatrix)) :
-        eigenFaceOfDataSet[i] = np.matmul(eigenVector,MatrixDifference[i])
 
     # Load Test Image
     testImage = Img(pathImage)
 
     # Difference Matrix dari Test Image dengan Nilai Tengah
-    differenceImage = DifferenceMatrix(testImage, matrixMedianOfDataSet)
+    differenceImage = (testImage - mean).flatten('F')
+    # differenceImage = np.array(differenceImage).T
 
     # Eigen Face dari Test Image
-    eigenFaceOfTestImage = np.matmul(eigenVector, differenceImage)
-    eigenFaceOfTestImage = np.real(eigenFaceOfTestImage)
+    weightTestImage = np.zeros((1, flattenDimension))
+    for i in range(M) :
+        tempEigFace = eigenFace[:,i]
+        weightTestImage[0][j] = np.dot(tempEigFace, differenceImage)
 
     # Hitung Eigen Distance
-    min = 99999999999
-    minIdx = -1
+    eigenDistanceOfTestImage = np.zeros((M))
 
-    eigenDistanceOfTestImage = np.zeros((len(eigenFaceOfDataSet)))
-
-    for i in range(len(eigenFaceOfDataSet)) :
-        dummyMatrix = eigenFaceOfTestImage - eigenFaceOfDataSet[i]
+    for i in range(M) :
+        dummyMatrix = weightTestImage - weight[:,i]
 
         for j in range(dummyMatrix.shape[0]) :
             for k in range(dummyMatrix.shape[1]) :
                 eigenDistanceOfTestImage[i] += dummyMatrix[j,k]**2
-
-        if eigenDistanceOfTestImage[i] < min :
-            min = eigenDistanceOfTestImage[i]
-            minIdx = i
+    
+    minIdx = np.argmin(eigenDistanceOfTestImage)
 
     imgMatrix = ArrOfMatrix[minIdx]
 
     # blue,green,red = cv.split(imgMatrix)
     # imgMatrix = cv.merge((red,green,blue))
-    color_img = cv.cvtColor(imgMatrix, cv.COLOR_GRAY2RGB)
+    # color_img = cv.cvtColor(imgMatrix, cv.COLOR_GRAY2RGB)
 
-    photoResult = Image.fromarray(color_img)
+    # photoResult = Image.fromarray(color_img)
 
     fileName = os.listdir(pathDir)[minIdx]
 
-
-    return photoResult, fileName, pathDir + '/' + fileName
+    return  fileName, pathDir + '/' + fileName
