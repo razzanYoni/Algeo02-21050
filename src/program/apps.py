@@ -19,7 +19,7 @@ root.configure(bg="#ffefd6")
 def computeResult():
     global resultImage
 
-    photo, nama, pathRes = getEigenFaceFromDataSet(direc, inputDir)
+    nama, pathRes = getResultEigenFaceFromImageFile(direc, inputDir)
     
     # blue,green,red = cv.split(photo)
     # photo = cv.merge((red,green,blue))

@@ -52,8 +52,7 @@ def load(dir) :
         image = (dir + r'/' + file)
         array = normalized(image)
         if (array is not None) :
-            temp = [get_name(file), array]
-            T.append(temp)
+            T.append(array)
 
         else :
             continue
