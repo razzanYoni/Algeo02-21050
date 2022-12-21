@@ -129,7 +129,7 @@ def page2():
 
     # ShowFrame section
 
-    emptyImage = ImageTk.PhotoImage(Image.open(".\Data\empty-256x256.png"))
+    emptyImage = ImageTk.PhotoImage(Image.open("./Data/empty-256x256.png"))
 
     showFrame = ctk.CTkFrame(master=imageFrameMain, fg_color="#3A8891", corner_radius=0)
     showFrame.grid(column=0, row=0, sticky="")
@@ -194,7 +194,7 @@ def page3():
 
     # ShowFrame section
 
-    emptyImage = ImageTk.PhotoImage(Image.open(".\Data\empty-256x256.png"))
+    emptyImage = ImageTk.PhotoImage(Image.open("./Data/empty-256x256.png"))
 
     showFrame = ctk.CTkFrame(master=imageFrameMain, fg_color="#3A8891", corner_radius=0)
     showFrame.grid(column=0, row=0, sticky="")
