@@ -14,9 +14,19 @@ yang akan diidentifikasi.
 
 ## How to Run The Program
 - Buka Terminal
-- Pastikan sudah berada pada venv dan menginstall semua library yang ada di requirements.txt
-- run "apps.py"
+- Install Virtual Environment dengan melakukan perintah 
+    - Windows 
+        ``` .\run.bat ``` 
+    - Linux
+        ``` ./run.sh  ```
+- Untuk menjalankan program lakukan perintah
+    - Windows
+        ``` .\app.bat ```
+    - Linux
+        ``` ./app.sh ```    
 
+## Data TestCase
+    Untuk mencoba test case bisa mengunduh folder dari link [ini](https://drive.google.com/file/d/1DR1MDiSHj9kz6x-kDYVPTd6CNLrZMGdu/view?usp=sharing)
 ## Contributors
 1. 13521050 Naufal Syifa Firdaus
 2. 13521056 Daniel Egiant Sitanggang

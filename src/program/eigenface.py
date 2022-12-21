@@ -1,11 +1,7 @@
 """Fungsi-fungsi Eigen"""
-from PIL import Image
 import numpy as np
 import os
 from loader import *
-import sys
-from pandas import DataFrame
-import cv2
 import matplotlib.pyplot as plt
 
 """Fungsi-fungsi Eigen"""
@@ -18,7 +14,6 @@ def qr_hr(A, dtype = float):
     Input A : matrix of float
     Output  : tuple of matrix (Q, R) 
     """
-
     (num_row, num_col) = np.shape(A)
     Q = np.eye(num_row)
     R = np.copy(A)    
@@ -46,9 +41,85 @@ def eval_evec(A, iter = 50):
         (Q, R) = qr_hr(Temp)
         evec = evec.dot(Q)
         Temp = R.dot(Q)
-    return [Temp[i][i] for i in range (len(Temp))], evec
+    # return [Temp[i][i] for i in range (len(Temp))], evec  # dengan eigen value
+    return evec
 
-def getResultEigenFaceFromImageFile(pathDir, pathImage) :
+def nxnTOn2(ArrayOfMatrix) :
+    # I.S : ArrayOfMatrix terdefinisi
+    # F.S : Mengembalikan ArrayOfMatrix dalam bentuk n^2
+
+    # KAMUS LOKAL
+    # ArrayOfVector : array of array of float
+    # i : integer
+
+    # ALGORITMA
+    ArrayOfVector = np.array([np.array(i).flatten() for i in ArrayOfMatrix])
+    return ArrayOfVector
+
+def meanOfMatrix(ArrOfVector) :
+    # I.S : ArrOfMatrix terdefinisi
+    # F.S : Mengembalikan mean dari ArrOfMatrix
+
+    # KAMUS LOKAL
+    # mean : Matrix
+
+    # ALGORITMA
+    mean = np.mean(ArrOfVector, axis = 0)
+    return mean
+
+def DifferenceOfMatrix(ArrOfVector, mean) :
+    # I.S : ArrOfMatrix terdefinisi
+    # F.S : Mengembalikan ArrOfMatrix - mean dan ArrOfVector - mean
+
+    # KAMUS LOKAL
+    # ArrOfDiff : array of Matrix
+
+    # ALGORITMA
+    ArrOfDiff = np.subtract(ArrOfVector, mean)
+    return ArrOfDiff
+
+def CovarianceOfMatrix(ArrOfDiffVec) :
+    # I.S : ArrOfDiffVec terdefinisi
+    # F.S : Mengembalikan Covariance dari ArrOfDiffVec
+
+    # KAMUS LOKAL
+    # MatrixCovariance : Matrix
+
+    # ALGORITMA
+    MatrixCovariance = np.matmul(ArrOfDiffVec, ArrOfDiffVec.T)
+    return MatrixCovariance
+
+def ArrOfEigenFace(ArrOfDiffVec, eigenVector) :
+    # I.S : ArrOfDiffVec dan eigenVector terdefinisi
+    # F.S : Mengembalikan hasil eigen face
+
+    # KAMUS LOKAL
+    # eigenFace : array of array of float
+
+    # ALGORITMA
+    eigenFace = []
+    for i,j in zip(eigenVector, ArrOfDiffVec) :
+        eigenFaceOfImg = np.zeros(256*256) 
+        for k in i :
+            eigenFaceOfImg +=  k * j
+        eigenFaceOfImg = eigenFaceOfImg / np.linalg.norm(eigenFaceOfImg)
+        eigenFace.append(eigenFaceOfImg)
+    eigenFace = np.array(eigenFace)
+    return eigenFace
+
+def weightOfImg(EigenFace, ArrOfDiffVec) :
+    # I.S : EigenFace dan ArrOfDiffVec terdefinisi
+    # F.S : Mengembalikan weight dari setiap data
+
+    # KAMUS LOKAL
+    # weight : array of array of float
+
+    # ALGORITMA
+    weight = [[np.dot(j,i) for j in EigenFace] for i in ArrOfDiffVec]
+    weight = np.array(weight)
+    return weight
+
+def getResultEigenFaceFromImageFile(pathDir, boolFaceCascade:bool=True, pathImage=None, NoneType = []) :
     # I.S : path terdefinisi
     # F.S : Mengembalikan nama file dengan eigen distance terkecil dan hasil foto
 
@@ -64,100 +135,100 @@ def getResultEigenFaceFromImageFile(pathDir, pathImage) :
     # ALGORITMA
 
     # Load DataSet
-    ArrOfMatrix = load(pathDir)
-
+    if boolFaceCascade :
+        ArrOfMatrix, NoneType = load(pathDir)
+    else :
+        ArrOfMatrix = loadWithoutCascade(pathDir)
+    
     # Ubah menjadi n^2
-    ArrOfVector = np.array([np.array(i).flatten('F') for i in ArrOfMatrix]).T
+    ArrOfVector = nxnTOn2(ArrOfMatrix)
 
-    # Hitung Mean
-    mean = np.mean(ArrOfMatrix, axis = 0)
-    meanFlatten = mean.flatten()
+    # Hitung Mean yang Sudah Diflat
+    mean = meanOfMatrix(ArrOfVector)
 
     # Hitung Difference
-    ArrOfDiff = ArrOfMatrix - mean
-    dimension = len(ArrOfVector[0])
-    ArrOfDiffVec = np.array([ArrOfVector[:,i] - meanFlatten for i in range (dimension)]).T
+    ArrOfDiffVec = DifferenceOfMatrix(ArrOfVector, mean)
 
     # Hitung Covariance
-    MatrixCovariance = np.matmul(ArrOfDiffVec.T, ArrOfDiffVec)
+    MatrixCovariance = CovarianceOfMatrix(ArrOfDiffVec)
 
     # Hitung Eigen
-    eigenValue, eigenVector = eval_evec(MatrixCovariance)
+    eigenVector = eval_evec(MatrixCovariance)
 
     # Hitung Eigen Face
-    eigenFace = []
-
-    for i in range(len(ArrOfDiffVec[0])) :
-        u = np.zeros((len(ArrOfDiff[0]), len(ArrOfDiff[0])))
-        for j in range(len(ArrOfDiffVec[0])) :
-            u += eigenVector[i][j] * ArrOfDiff[j]
-        eigenFace.append(u.flatten('F'))
-    eigenFace = np.array(eigenFace)
-    eigenFace = eigenFace.T
-    
-
-    # eigenFace = np.array([i/(i.sum()) for i in eigenFace])
+    eigenFace = ArrOfEigenFace(ArrOfDiffVec, eigenVector)    
 
     # TEST EIGEN FACE
-    # for i in range (len(eigenFace)):
-    #     plt.imshow(eigenFace[i], cmap="gray")
+    # for i in (eigenFace):
+    #     i = i.reshape(256,256)
+    #     plt.imshow(i, cmap="gray")
     #     plt.show()
 
-
     # Hitung weight DataSet
-    M = len(eigenVector)
-    flattenDimension = len(ArrOfDiffVec[0])
-    weight = []
-    for i in range(len(ArrOfDiffVec[0])) :
-        tempDifference = ArrOfDiffVec[:,i]
-        comb = []
-        for j in range(len(eigenFace[0])) :
-            tempEigFace = eigenFace[:,j]
-            dot = np.matmul(tempEigFace, tempDifference)
-            comb.append(dot)
-        weight.append(comb)
+    weightOfDataSet = weightOfImg(eigenFace, ArrOfDiffVec)
 
-    weight = np.array(weight)
-    # temp = np.zeros((256,256))
-    # for i in range(M):
-    #     temp += weight[0][i] * eigenFace[i,:]
-    # plt.imshow(temp, cmap="gray")
-    # plt.show()
-
+    # Test Menampilkan weight DataSet
+    # for i,j in zip(weight, eigenFace) :
+    #     temp = np.zeros((256*256))
+    #     for k in i :
+    #         temp += k * j
+    #     temp = temp.reshape(256,256)
+    #     plt.imshow(temp, cmap="gray")
+    #     plt.show()
 
     # Load Test Image
-    testImage = Img(pathImage)
+    if type(pathImage) is str :
+        if boolFaceCascade :
+            testImage = normalized(pathImage)
+            if testImage is None :
+                testImage = normalizedNone(pathImage).flatten()
+            else :
+                testImage = testImage.flatten()
+        else :
+            testImage = normalizedNone(pathImage).flatten()
+    else :
+        testImage = pathImage.flatten()
+        # if boolFaceCascade :
+        #     testImage = normalized_obj_img(pathImage)
+        #     if testImage is None :
+        #         testImage = normalized_obj_img_None(pathImage).flatten()
+        #     else :
+        #         testImage = testImage.flatten()
+        # else :
+        #     testImage = normalizedNone(pathImage).flatten()
 
     # Difference Matrix dari Test Image dengan Nilai Tengah
-    differenceImage = (testImage - mean).flatten('F')
-    # differenceImage = np.array(differenceImage).T
+    diffImage = DifferenceOfMatrix([testImage], mean)
 
     # Eigen Face dari Test Image
-    weightTestImage = np.zeros((1, flattenDimension))
-    for i in range(M) :
-        tempEigFace = eigenFace[:,i]
-        weightTestImage[0][j] = np.dot(tempEigFace, differenceImage)
+    weightOfTestImage = weightOfImg(eigenFace, diffImage)
 
     # Hitung Eigen Distance
-    eigenDistanceOfTestImage = np.zeros((M))
+    lenOfWeight = len(weightOfDataSet)
+    eigenDistanceOfTestImage = np.zeros(lenOfWeight)
 
-    for i in range(M) :
-        dummyMatrix = weightTestImage - weight[:,i]
-
-        for j in range(dummyMatrix.shape[0]) :
-            for k in range(dummyMatrix.shape[1]) :
-                eigenDistanceOfTestImage[i] += dummyMatrix[j,k]**2
+    for i in range(lenOfWeight) :
+        for j in (np.subtract(weightOfTestImage[0], weightOfDataSet[i])) :
+                eigenDistanceOfTestImage[i] += j**2
     
     minIdx = np.argmin(eigenDistanceOfTestImage)
+    # print(eigenDistanceOfTestImage)
 
-    imgMatrix = ArrOfMatrix[minIdx]
-
-    # blue,green,red = cv.split(imgMatrix)
-    # imgMatrix = cv.merge((red,green,blue))
-    # color_img = cv.cvtColor(imgMatrix, cv.COLOR_GRAY2RGB)
-
-    # photoResult = Image.fromarray(color_img)
+    # if len(NoneType) > 0 :
+    for i in NoneType :
+        if (i <= minIdx) :
+            minIdx +=1
+        else :
+            break
 
     fileName = os.listdir(pathDir)[minIdx]
 
     return  fileName, pathDir + '/' + fileName
+
+if __name__ == "__main__":
+    from tkinter import filedialog
+    pathDir = filedialog.askdirectory()
+    pathImage = filedialog.askopenfilename()
+    fileName, path = getResultEigenFaceFromImageFile(pathDir, True, pathImage)
+    print("image", pathImage)
+    print("closest", fileName)

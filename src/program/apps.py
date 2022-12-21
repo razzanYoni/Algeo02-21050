@@ -1,14 +1,13 @@
 """ Program GUI Apps """
 import tkinter as tk
 import customtkinter as ctk
+import cv2 as cv
+import numpy as np    
+import time 
 from tkinter import filedialog
 from PIL import ImageTk,Image
-import cv2 as cv
-import numpy as np
-
-# from data_processing import *
-from eigen import *
-
+from loader import normalized_obj_img, normalized_obj_img_None
+from eigenface import *
 
 root = tk.Tk()
 
@@ -20,85 +19,91 @@ root.configure(bg="#ffefd6")
 def computeResult():
     global resultImage
 
-    nama, pathRes = getResultEigenFaceFromImageFile(direc, inputDir)
+    nama, pathRes = getResultEigenFaceFromImageFile(direc, boolFaceCascade, inputDir)
     
-    # blue,green,red = cv.split(photo)
-    # photo = cv.merge((red,green,blue))
-    # colorConv = Image.fromarray(photo)
     img = Image.open(pathRes)
     imageSized = img.resize((256, 256))
     imageRes = ImageTk.PhotoImage(imageSized)
+
     resultImage.image = imageRes
     resultImage.configure(image=imageRes)
-    # resultImage = ctk.CTkLabel(master=showFrame, image=resultImage)
-    # resultImage.grid(column=1, row=1, sticky="E",pady=50, padx=50)
     
     result.configure(text=nama, text_color="green")
 
-def computeCamera():
-    global resultImage
+def TrueCascade():
+    global boolFaceCascade
 
-    photo, nama, pathRes = getEigenFaceFromCamera(direc, framearr)
-    
-    # blue,green,red = cv.split(photo)
-    # photo = cv.merge((red,green,blue))
-    # colorConv = Image.fromarray(photo)
-    img = Image.open(pathRes)
-    imageSized = img.resize((256, 256))
-    imageRes = ImageTk.PhotoImage(imageSized)
-    resultImage.image = imageRes
-    resultImage.configure(image=imageRes)
-    # resultImage = ctk.CTkLabel(master=showFrame, image=resultImage)
-    # resultImage.grid(column=1, row=1, sticky="E",pady=50, padx=50)
-    
-    result.configure(text=nama, text_color="green")
+    boolFaceCascade = True
+
+def FalseCascade():
+    global boolFaceCascade
+
+    boolFaceCascade = False
 
 def capture():
+    global resultImage
     global tesImage
     global framearr
+    global result
+    global direc
+    global boolFaceCascade
 
+    timeDummy = time.time()
     vid = cv.VideoCapture(0)
-    #vid.set(3, 256)
 
-    
-    while(True):
-        # Capture the video frame
-        # by frame
-        ret, frame = vid.read()
-    
-        # Display the resulting frame
-        cv.imshow('frame', frame)
-        
-        # the 'q' button is set as the
-        # quitting button you may use any
-        # desired button of your choice
-        if cv.waitKey(1) & 0xFF == ord(' '):
+    # Create the haar cascade
+    # face_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    while(direc is not None and boolFaceCascade is not None):
+        # Capture the video frame by frame
+        frame = vid.read()[1]
+
+        # Cascade Bounding Box
+        # gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        # faces = face_cascade.detectMultiScale(gray, 1.03, 3)
+        # for (x,y,w,h) in faces:
+        #     cv.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+
+        # Resize the frame
+        frame = Image.fromarray(frame).resize((256,256))
+
+        # Display the frame
+        imageTes = ImageTk.PhotoImage(image=frame)
+        tesImage.image = imageTes
+        tesImage.configure(image=imageTes)
+        root.update()
+
+        frame = np.array(frame)
+
+        if cv.waitKey(1) and int(time.time() - timeDummy) % 10 == 0 and int(time.time() - timeDummy) != 0:
+            if boolFaceCascade:
+                mat = normalized_obj_img(frame)
+                if mat is None:
+                    mat = normalized_obj_img_None(frame)
+            else:
+                mat = normalized_obj_img_None(frame)
+
+            nama, pathRes = getResultEigenFaceFromImageFile(direc, boolFaceCascade, mat)
+            img = Image.open(pathRes)
+            imageSized = img.resize((256, 256))
+            imageRes = ImageTk.PhotoImage(imageSized)
+
+            resultImage.image = imageRes
+            resultImage.configure(image=imageRes)
+            
+            result.configure(text=nama, text_color="green")
+            timeDummy = time.time()
+
+        elif (cv.waitKey(1) & 0xFF == ord(' ')):
             vid.release()
             cv.destroyAllWindows()
-            cv.imshow('image', frame)
-            cv.waitKey(0)
             break
-
-
-    framearr = np.array(frame)
-
-    blue,green,red = cv.split(frame)
-    frame_split = cv.merge((red,green,blue))
-    color_converted = Image.fromarray(frame_split)
-
-    image_resized = color_converted.resize((256,256))
-
-    imageTes = ImageTk.PhotoImage(image=image_resized)
-    tesImage.image = imageTes
-    tesImage = ctk.CTkLabel(master=showFrame, image=imageTes)
-    tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
 
 def askDirectory():
     global direc
 
     direc = filedialog.askdirectory()
     
-
 def printImage():
     global inputDir
     global tesImage
@@ -107,8 +112,6 @@ def printImage():
     img  = Image.open(inputDir)
     imageSized = img.resize((256, 256))
     imageTes = ImageTk.PhotoImage(imageSized)
-    # lbl = ctk.CTkLabel(master=showFrame, image=imageTes)
-    # lbl.grid()
     tesImage.image = imageTes
     tesImage = ctk.CTkLabel(master=showFrame, image=imageTes)
     tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
@@ -124,11 +127,9 @@ def page2():
     imageFrameMain = ctk.CTkFrame(master=root, width=1280, height=720, fg_color="#ffefd6", corner_radius=0)
     imageFrameMain.grid()
 
-    #imageFrameMain.columnconfigure([0,1], weight=1)
-
     # ShowFrame section
 
-    emptyImage = ImageTk.PhotoImage(Image.open("..\empty-256x256.png"))
+    emptyImage = ImageTk.PhotoImage(Image.open(".\Data\empty-256x256.png"))
 
     showFrame = ctk.CTkFrame(master=imageFrameMain, fg_color="#3A8891", corner_radius=0)
     showFrame.grid(column=0, row=0, sticky="")
@@ -140,7 +141,6 @@ def page2():
     tesImage = ctk.CTkLabel(master=showFrame, image=emptyImage, fg_color="#cfcfcf")
     tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
 
-
     resultShowTitle = ctk.CTkLabel(master=showFrame, text="Closest\n Result", text_font=("Inter Bold", 15))
     resultShowTitle.grid(column=0,row=1, sticky="E",padx=20)
 
@@ -148,10 +148,7 @@ def page2():
     resultImage = ctk.CTkLabel(master=showFrame, image=emptyImage, fg_color="#cfcfcf")
     resultImage.grid(column=1, row=1, sticky="E",pady=50, padx=50)
 
-
-
     # inputFrame section
-
 
     inputFrame = ctk.CTkFrame(master=imageFrameMain ,fg_color="#ffefd6", corner_radius=0)
     inputFrame.grid(column=1, row=0, sticky="W N", padx=170)
@@ -161,14 +158,9 @@ def page2():
     resultTitle = ctk.CTkLabel(master=inputFrame, text="Result", text_font=("Tahoma Bold", 30), text_color="#0E5E6F")
     resultTitle.grid(column=0, row=1, sticky="N", columnspan=2, pady=20)
 
-
-
     result = ctk.CTkLabel(master=inputFrame, text="None", text_font=("Tahoma Bold", 20), text_color="#EB6440")
     result.grid(column=0, row=2, sticky="N", columnspan=2, pady=30)
-
-    # fileFrame = ctk.CTkFrame(master=inputFrame, )
-
-
+    
     trainInput = ctk.CTkButton(master=inputFrame, text="Choose Folder", width=150, height=40, corner_radius=10, command=askDirectory)
     trainInput.grid(column=1, row=3, sticky="N", pady=50)
     trainTitle = ctk.CTkLabel(master=inputFrame, text="Training Dataset : ", text_font="Tahoma", text_color="#0E5E6F")
@@ -179,8 +171,15 @@ def page2():
     tesTitle = ctk.CTkLabel(master=inputFrame, text="Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
     tesTitle.grid(column=0, row=4, sticky="N")
 
+    faceCascade = ctk.CTkLabel(master=inputFrame, text="Face Cascade : ", text_font="Tahoma", text_color="#0E5E6F")
+    faceCascade.grid(column=0, row=6, sticky="N", pady = 50)
+    TrueButton = ctk.CTkButton(master=inputFrame, text="Yes", width=40, height=35, text_font=("Tahoma", 8), corner_radius=10, command=TrueCascade)
+    TrueButton.grid(column=1, row=6, sticky="N", pady = 50)
+    FalseButton = ctk.CTkButton(master=inputFrame, text="No", width=40, height=35, text_font=("Tahoma", 8), corner_radius=10, command=FalseCascade)
+    FalseButton.grid(column=2, row=6, sticky="N", pady = 50)
+
     computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10, command=computeResult)
-    computeButton.grid(column=0, row=5, columnspan=2, pady=80)
+    computeButton.grid(column=0, row=7, columnspan=2, pady=10)
 
 def page3():
     global showFrame
@@ -193,11 +192,9 @@ def page3():
     imageFrameMain = ctk.CTkFrame(master=root, width=1280, height=720, fg_color="#ffefd6", corner_radius=0)
     imageFrameMain.grid()
 
-    #imageFrameMain.columnconfigure([0,1], weight=1)
-
     # ShowFrame section
 
-    emptyImage = ImageTk.PhotoImage(Image.open("..\empty-256x256.png"))
+    emptyImage = ImageTk.PhotoImage(Image.open(".\Data\empty-256x256.png"))
 
     showFrame = ctk.CTkFrame(master=imageFrameMain, fg_color="#3A8891", corner_radius=0)
     showFrame.grid(column=0, row=0, sticky="")
@@ -207,31 +204,23 @@ def page3():
     tesImage = ctk.CTkLabel(master=showFrame, image=emptyImage, fg_color="#cfcfcf")
     tesImage.grid(column=1, row=0, sticky="E", pady= 60, padx=50)
 
-
     resultShowTitle = ctk.CTkLabel(master=showFrame, text="Closest\n Result", text_font=("Inter Bold", 15))
     resultShowTitle.grid(column=0,row=1, sticky="E",padx=20)
     resultImage = ctk.CTkLabel(master=showFrame, image=emptyImage, fg_color="#cfcfcf")
     resultImage.grid(column=1, row=1, sticky="E",pady=50, padx=50)
 
-
-
     # inputFrame section
-
 
     inputFrame = ctk.CTkFrame(master=imageFrameMain ,fg_color="#ffefd6", corner_radius=0)
     inputFrame.grid(column=1, row=0, sticky="W N", padx=170)
 
-    titlePage = ctk.CTkLabel(master=inputFrame, text="Input from Image", text_font=("Tahoma",18), text_color="#0E5E6F")
+    titlePage = ctk.CTkLabel(master=inputFrame, text="Input from Camera", text_font=("Tahoma",18), text_color="#0E5E6F")
     titlePage.grid(column=0, row=0, sticky="N", columnspan=2, pady=50, padx=100)
     resultTitle = ctk.CTkLabel(master=inputFrame, text="Result", text_font=("Tahoma Bold", 30), text_color="#0E5E6F")
     resultTitle.grid(column=0, row=1, sticky="N", columnspan=2, pady=30)
 
-
-
     result = ctk.CTkLabel(master=inputFrame, text="None", text_font=("Tahoma Bold", 20), text_color="#EB6440")
     result.grid(column=0, row=2, sticky="N", columnspan=2, pady=30)
-
-    # fileFrame = ctk.CTkFrame(master=inputFrame, )
 
     # ________________ BUTTON ________________
 
@@ -245,13 +234,15 @@ def page3():
     tesTitle = ctk.CTkLabel(master=inputFrame, text="Capture Test Image : ", text_font="Tahoma", text_color="#0E5E6F")
     tesTitle.grid(column=0, row=4, sticky="N")
 
-    tipText = ctk.CTkLabel(master=inputFrame, text="Place your head in the middle dan press SPACE to capture. Do not use mask.", text_color="black")
+    tipText = ctk.CTkLabel(master=inputFrame, text="The camera takes the picture every 10 seconds. Do not use mask.", text_color="black")
     tipText.grid(column=0, row=5, columnspan=2, pady=30)
 
-    computeButton = ctk.CTkButton(master=inputFrame, text="Compute", width=200, height=60, text_font=("Tahoma", 15), corner_radius=10, command=computeCamera)
-    computeButton.grid(column=0, row=6, columnspan=2, pady=0)
-
-
+    faceCascade = ctk.CTkLabel(master=inputFrame, text="Face Cascade : ", text_font="Tahoma", text_color="#0E5E6F")
+    faceCascade.grid(column=0, row=6, sticky="N", pady = 5)
+    TrueButton = ctk.CTkButton(master=inputFrame, text="Yes", width=40, height=35, text_font=("Tahoma", 8), corner_radius=10, command=TrueCascade)
+    TrueButton.grid(column=1, row=6, sticky="N", pady = 5)
+    FalseButton = ctk.CTkButton(master=inputFrame, text="No", width=40, height=35, text_font=("Tahoma", 8), corner_radius=10, command=FalseCascade)
+    FalseButton.grid(column=2, row=6, sticky="N", pady = 5)
 
 def home():
     global homeFrameMain
@@ -259,7 +250,6 @@ def home():
     """ Page """
     homeFrameMain = tk.Frame(root, width=1280, height=720,bg="#ffefd6" )
     homeFrameMain.pack()
-
 
     buttonFrame = tk.Frame(homeFrameMain, padx=100, pady=0, bg="#ffefd6")
     buttonFrame.grid(column=1, row=0, sticky="N", pady=450)
@@ -288,11 +278,7 @@ def home():
     creditTitle = ctk.CTkLabel(master=creditFrame,corner_radius=10, fg_color="white", text_color="grey", text="\n This face recognition sofware is made for    \nfullfiling the linear algebra and geometry   \n course grand assignment. Credit due to BosenTuru\ngroup of Bandung Institue of Technology \n \n- Naufal Syifa Firdaus (13521050) \n- Daniel Egiant Sitanggang (13521056)\n- Razzan Daksana Yoni (13521087)\n", text_font=("Arial", 10))
     creditTitle.grid(column=0, row=0)
     
-
-
-
 home()
 """ Main Program """
-
 
 root.mainloop()

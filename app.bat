@@ -1,0 +1,1 @@
+python .\src\program\apps.py

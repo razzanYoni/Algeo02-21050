@@ -1,28 +1,19 @@
 from PIL import Image
 import numpy as np
 import cv2
+import matplotlib.image as image
+from skimage.color import rgb2gray
 import os
-
-from numpy import linalg
-
-def get_name(string):
-    result = ''
-    for char in string:
-        if char.isalpha():
-            result += char
-    return result.lower()
-
 
 def normalized_obj_img(image) :
     # Mengembalikan matrix dari image "name" yang sudah dinormalisasi
     # yaitu di crop di bagian muka dan berukuran 256 x 256
 
-
     # Membaca image dan mengubah dalam bentuk grayscale
     img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Mendeteksi wajah
-    face_cascade = face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     face = face_cascade.detectMultiScale(img, 1.1, 4)
     
     # Wajah tidak terdeteksi
@@ -44,17 +35,39 @@ def normalized_obj_img(image) :
 
     return np.array(face)
 
-def normalized(name) :
+def normalized_obj_img_None(image) :
     # Mengembalikan matrix dari image "name" yang sudah dinormalisasi
     # yaitu di crop di bagian muka dan berukuran 256 x 256
 
+    # Membaca image dan mengubah dalam bentuk grayscale
+    img = rgb2gray(image)
+
+    # resize image
+    img = Image.fromarray(img).resize((256,256))
+    return np.array(img)
+
+def normalizedNone(pathOfImage) :
+    # I.S : pathOfImage adalah path dari image yang akan dinormalisasi
+    # F.S : M   engembalikan matrix dari image "name" yang sudah dinormalisasi berukuran 256 x 256
+
+    # Membaca image dan mengubah dalam bentuk grayscale
+    img = image.imread(pathOfImage)
+    img = rgb2gray(img)
+
+    # resize image
+    img = Image.fromarray(img).resize((256,256))
+    return np.array(img)
+
+def normalized(name) :
+    # Mengembalikan matrix dari image "name" yang sudah dinormalisasi
+    # yaitu di crop di bagian muka dan berukuran 256 x 256
 
     # Membaca image dan mengubah dalam bentuk grayscale
     img = cv2.imread(name)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Mendeteksi wajah
-    face_cascade = face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     face = face_cascade.detectMultiScale(img, 1.1, 4)
     
     # Wajah tidak terdeteksi
@@ -79,31 +92,23 @@ def normalized(name) :
 def load(dir) :
     # Mengembalikan array of normalized image dari directory yang dimasukkan
     T = []
-    for file in os.listdir(dir) :
+    NoneType = []
+    for i in range(len(os.listdir(dir))) :
+        file = os.listdir(dir)[i]
         image = (dir + r'/' + file)
         array = normalized(image)
         if (array is not None) :
             T.append(array)
-
         else :
-            continue
+            NoneType.append(i)
+        
+    return T, NoneType
+
+def loadWithoutCascade(dir) :
+    # Mengembalikan array of normalized image dari directory yang dimasukkan
+    T = []
+    for file in os.listdir(dir) :
+        image = (dir + r'/' + file)
+        array = normalizedNone(image)
+        T.append(array)
     return T
-    
-def Img(path) :
-    # Mengembalikan array of normalized image dari path yang dimasukkan
-    img = normalized(path)
-
-    if (img is not None) :
-        return img
-    else :
-        return None
-
-
-def Img2(image) :
-    # Mengembalikan array of normalized image dari path yang dimasukkan
-    img = normalized_obj_img(image)
-
-    if (img is not None) :
-        return img
-    else :
-        return None
