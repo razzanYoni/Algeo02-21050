@@ -26,7 +26,7 @@ yang akan diidentifikasi.
         ``` ./app.sh ```    
 
 ## Data TestCase
-    Untuk mencoba test case bisa mengunduh folder dari link [ini](https://drive.google.com/file/d/1DR1MDiSHj9kz6x-kDYVPTd6CNLrZMGdu/view?usp=sharing)
+Untuk mencoba test case bisa mengunduh folder dari link [ini](https://drive.google.com/file/d/1DR1MDiSHj9kz6x-kDYVPTd6CNLrZMGdu/view?usp=sharing/)
 ## Contributors
 1. 13521050 Naufal Syifa Firdaus
 2. 13521056 Daniel Egiant Sitanggang
